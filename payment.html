@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ยืนยันการชำระเงิน</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9f9;
+            text-align: center;
+            padding: 20px;
+        }
+        #qrCode {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🔰 QR Code สำหรับชำระเงิน</h2>
+    <p>กรุณาสแกน QR Code เพื่อชำระเงิน</p>
+    <div>
+        <img id="qrCode" src="" alt="QR Code">
+    </div>
+    <br>
+
+    <!-- ปุ่มยืนยันการชำระเงิน -->
+    <button id="confirm-payment" class="btn btn-success">✅ ยืนยันการชำระเงิน</button>
+
+    <a href="index.html" class="btn btn-primary mt-3">🏠 กลับไปหน้าหลัก</a>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const amount = urlParams.get("amount") || 0;
+        const orderId = urlParams.get("orderId");  // รับ orderId จาก URL
+
+        const phoneNumber = "0812345678"; // ✅ เปลี่ยนเป็นเบอร์ PromptPay ที่ใช้รับเงิน
+        const apiBaseUrl = "http://localhost:3000";
+
+        // ✅ สร้าง QR Code
+        async function generateQRCode() {
+            let response = await fetch(`${apiBaseUrl}/generate-payment-qr?phone=${phoneNumber}&amount=${amount}`);
+            let data = await response.json();
+            if (data.qrCode) {
+                document.getElementById("qrCode").src = data.qrCode;
+            } else {
+                alert("❌ ไม่สามารถสร้าง QR Code ได้!");
+            }
+        }
+
+        // ✅ ยืนยันการชำระเงิน
+        document.getElementById("confirm-payment").addEventListener("click", async () => {
+    // ดึง orderId จาก URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("orderId");
+
+    if (!orderId) {
+        alert("❌ ไม่พบ Order ID");
+        return;
+    }
+
+    try {
+        let response = await fetch(`http://localhost:3000/mock-payment/${orderId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        let result = await response.json();
+        if (response.ok) {
+            alert("✅ ชำระเงินสำเร็จ!");
+            window.location.href = "index.html"; // กลับไปที่หน้าหลัก
+        } else {
+            alert(`❌ ชำระเงินไม่สำเร็จ: ${result.error}`);
+        }
+    } catch (error) {
+        alert("❌ มีข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    }
+});
+
+
+
+        window.onload = generateQRCode;
+    </script>
+
+</body>
+</html>
