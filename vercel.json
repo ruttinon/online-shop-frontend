@@ -1,0 +1,11 @@
+{
+    "build": {
+      "outputDirectory": "public"
+    },
+    "rewrites": [
+      { "source": "/", "destination": "/index.html" },
+      { "source": "/admin", "destination": "/admin.html" },
+      { "source": "/payment", "destination": "/payment.html" }
+    ]
+  }
+  
